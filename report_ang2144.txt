@@ -1,0 +1,71 @@
+Ariana Giorgi
+ang2144
+AI Project 1
+
+Instructions to run. Once in LISP...
+$ (load "grammar_ang2144.lisp")
+
+;to generate a random-sentence:
+$ (random-sentence 'sentence)
+
+;to generate a random sentence that meets the criteria in validp (described in part II)
+$ (generateValid 'sentence)
+
+I.Context Free Grammar
+1.Build sophisticated grammar
+
+non-terminals: noun-phrase, verb-phrase, verb-phrasePast, prep-phrase, infinitive-phrase, relative-clause
+pre-terminals: Article, Determiner, Noun, NounPlural, Pronoun, relativePronoun, TransVerb, IntransVerb, VerbPast, AuxVerb, LinkVerb, InfParticle, Adj, Prep, Adverb, Quantifier, Conjunction, SubordinatingConj
+
+Notes:
+-I distinguished between Noun and NounPlural because of the Quantifiers "several" and "few" that wouldn't make sense being used with a single noun.
+-Separated Quantifiers from adjectives since they are specifically for plural nouns, and adjectives in general can be used for either singular or plural.
+-I separated Transitive and Intransitive Verbs to specify that Transitive verbs could be followed by a subject.
+-I put "be" in it's own category, LinkVerb, because it's pretty unique in that, in the sentences we were given, it would often link another verb (like the Auxiliary verb "should") with an adjective.
+-Defined the infinitive-phrase with the particle "to" since "to" was also used in a unique way as the start of an inf-phrase like "to see it" (sent 4) or "to pay well" (sent 3).
+-Defined relative-clause because in sentence 3, the segment "that tend" uses a relative prounoun "that" before the verb.
+-Distinguished "whether" as Subordinating Conjunction so as not to be used in place of a conjuction like "and/but/or".
+-Separated Articles "the/a" from Determiners "this/there/such", because, even though they are sometimes interchangable, most times they are not and this/there/such are formally known as determiners.
+-Because sentence 5 started with a subordinating conjuction, it was instructed to us to be defined as such: sentence -> (SubordinatingConj sentence verb-phrase prep-phrase). This lead to some sentences like "Whether whether the man...". This was fixed in part II since select repeat words, like "whether" are prevented.
+
+To print the 10,000 sentences generated from the random-sentence function, I ran the following script in clisp:
+(with-open-file (outfile "q1_ang2144.txt" :direction :output) (prin1 (dotimes (n 10000) (print (random-sentence 'sentence) outfile)) outfile))
+
+2. Generating specified sentences
+
+Sentence 1
+(defparameter rules1 '((sentence 2) (noun-phrase 3) (Adj 0) (Noun 4) (verb-phrase 1) (AuxVerb 0) (TransVerb 0) (noun-phrase 8) (Article 0) (Adj 1) (Noun 5) (prep-phrase 0) (Prep 0) (noun-phrase 1) (Noun 6)))
+(HIGHER EDUCATION MUST COUNTER THE PREVAILING NARRATIVE OF POLARIZATION)
+
+Sentence 2
+(defparameter rules2 '((sentence 1) (noun-phrase 9) (Determiner 0) (Adj 2) (Noun 7) (verb-phrase 2) (AuxVerb 1) (Adverb 0) (TransVerb 1) (noun-phrase 8) (Article 0) (Adj 3) (Noun 8)))
+(THIS FLAWED STRATEGY WILL HARDLY ACHIEVE THE DESIRED INTENT)
+
+Sentence 3
+(defparameter rules3 '((sentence 3) (noun-phrase 10) (Determiner 1) (VerbPast 4) (noun-phrase 5) (Adj 4) (noun-phrase 6) (Noun 9) (noun-phrase 14) (NounPlural 0)
+  (prep-phrase 0) (Prep 3) (noun-phrase 12) (Quantifier 0) (NounPlural 1) (relative-clause 0) (relativePronoun 0) (IntransVerb 0) (infinitive-phrase 0) (InfParticle 0) (IntransVerb 1) (Adj 5)
+  (prep-phrase 1) (Determiner 2) (Prep 1) (noun-phrase 13) (noun-phrase 1) (Noun 10) (Conjunction 0) (noun-phrase 13) (noun-phrase 4) (Adj 6) (NounPlural 2) (Conjunction 0) (noun-phrase 6) (Noun 11) (noun-phrase 1) (Noun 12)))
+(THERE WERE SOLID JOB GAINS IN SEVERAL INDUSTRIES THAT TEND TO PAY WELL SUCH AS BUSINESS AND PROFESSIONAL SERVICES AND
+ HEALTH CARE)
+
+Sentence 4
+(defparameter rules4 '((sentence 5) (sentence 2) (noun-phrase 0) (Article 0) (Noun 13) (verb-phrase 3) (AuxVerb 1) (Adverb 1) (LinkVerb 0) (Adj 7) (prep-phrase 0) (Prep 4) (noun-phrase 8) (Article 0) (Adj 8) (Noun 14)
+  (Conjunction 1) (sentence 4) (noun-phrase 4) (Adj 9) (NounPlural 3) (verb-phrase 4) (AuxVerb 2) (LinkVerb 0) (Adj 10) (infinitive-phrase 1) (InfParticle 0) (verb-phrase 0) (TransVerb 2) (noun-phrase 2) (Pronoun 0)
+  (prep-phrase 0) (Prep 2) (noun-phrase 14) (NounPlural 4)))
+(THE ASTEROID WILL NOT BE VISIBLE TO THE NAKED EYE BUT AMATEUR ASTRONOMERS SHOULD BE ABLE TO SEE IT WITH TELESCOPES)
+
+Sentence 5
+(defparameter rules5 '((sentence 6) (SubordinatingConj 0) (sentence 2) (noun-phrase 0) (Article 0) (Noun 15) (verb-phrase 1) (AuxVerb 1) (TransVerb 3) (noun-phrase 7) (Article 0) (noun-phrase 6) (Noun 16) (noun-phrase 1) (Noun 17)
+  (prep-phrase 0) (Prep 3) (noun-phrase 0) (Article 0) (Noun 18) (verb-phrase 4) (AuxVerb 1) (LinkVerb 0) (Adj 11) (prep-phrase 0) (Prep 3) (noun-phrase 11) (Article 1) (Quantifier 1) (NounPlural 5)))
+(WHETHER THE PROSECUTION WILL SEEK THE DEATH PENALTY IN THE CASE WILL BE DECIDED IN A FEW WEEKS)
+
+II.Rejecting Sentences
+
+In the validp funcition, 5 criteria are evaluated for the validation of a sentence:
+1.sentence length < N1; simply found by calling the length of the list
+2.tree depth < N2; tree depth is tracked through the random-sentence function. Every time a non-terminal is processed through the function, the depth of the tree increases until a word is reached and then the depth resets to 0. Each time a new depth is calculated, it is compared to whatever is stored as the maximum depth and if it is greater, then it replaces this number. The result is the overall depth of the sentence.
+3.Same word cannot appear twice, unless it is a preposition, article, conjuctions; I created a function repeatedWords to loop through the words in the phrase and see if any are repeated. If they are, they are held in the list "repeated" and then compared to the list of words that are ok to repeat. The list, OKtoRepeat is hardcoded with words that are infivitive particles (to), prepositions, articles, determiners, and conjunctions.
+4.I choose to make another criteria that there can be no more than five nouns in a sentence since otherwise it start to becomes too complex. While looping through each word in the repeatedWords function, I also kept track of the number of words that were nouns by comparing them to the nouns and pronouns listed in the group "onlyFive" (hardcoded similarly to "OKtoREPEAT".
+5.The final criteria I made was to limit the part of the sentence that could have been derived by the non-terminal 'sentence' to three. I figured this would help eliminate some confusing or unnecessary run-on sentences. I also implemented the count of the number of 'sentence' phrases into the random-sentence function by increasing the count if the non-terminal phrase that was passed into the function was the word 'sentence'.
+
+In the file "q2_ang2144.txt", you can see sentences REJECTED by this generateValid function. These were printed to an output file similarly as in part I.
